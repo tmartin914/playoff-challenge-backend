@@ -5,7 +5,7 @@ const Op = db.Sequelize.Op;
 
 const fs = require("fs-extra")
 const path = require('path');
-const playerDataJson = path.resolve('./backend/players.json');
+const playerDataJson = path.resolve('./players.json');
 
 exports.findAll = (req, res) => {
   console.log('findAll');
