@@ -4,7 +4,7 @@ const cors= require("cors");
 const app = express();
 
 var corsOptions = {
-    origin: ["http://localhost:3001", "https://playoff-challenge-frontend-7b0dc86b07c6.herokuapp.com/"]
+    origin: ["http://localhost:3001", "https://playoff-challenge-frontend-7b0dc86b07c6.herokuapp.com"]
 };
 
 app.use(cors(corsOptions));
