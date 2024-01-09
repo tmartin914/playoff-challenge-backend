@@ -1,0 +1,272 @@
+{
+  "id": "736474f0-adc5-11ee-b174-6f0e0e094ae8",
+  "year": 2023,
+  "type": "PST",
+  "name": "PST",
+  "week": {
+      "id": "cf6e1a40-c6c9-453f-91be-689c22c92a49",
+      "sequence": 1,
+      "title": "1",
+      "games": [{
+          "id": "c2e79f3f-2a4d-437d-a48a-8d1b18f443d2",
+          "status": "scheduled",
+          "scheduled": "2024-01-13T21:30:00+00:00",
+          "entry_mode": "LDE",
+          "sr_id": "sr:match:46792587",
+          "game_type": "playoff",
+          "conference_game": true,
+          "title": "AFC Wild Card",
+          "venue": {
+              "id": "6a72e5ca-33d0-40af-8e6b-b32a4d3d9346",
+              "name": "NRG Stadium",
+              "city": "Houston",
+              "state": "TX",
+              "country": "USA",
+              "zip": "77054",
+              "address": "One Reliant Park",
+              "capacity": 72220,
+              "surface": "artificial",
+              "roof_type": "retractable_dome",
+              "sr_id": "sr:venue:2402",
+              "location": {
+                  "lat": "29.684735",
+                  "lng": "-95.410725"
+              }
+          },
+          "home": {
+              "id": "82d2d380-3834-4938-835f-aec541e5ece7",
+              "name": "Houston Texans",
+              "alias": "HOU",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4324"
+          },
+          "away": {
+              "id": "d5a2eb42-8065-4174-ab79-0a6fa820e35e",
+              "name": "Cleveland Browns",
+              "alias": "CLE",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4417"
+          },
+          "broadcast": {
+              "network": "NBC"
+          }
+      }, {
+          "id": "cc23f026-32ea-4c2a-8f6d-c873a6844178",
+          "status": "scheduled",
+          "scheduled": "2024-01-14T01:00:00+00:00",
+          "entry_mode": "LDE",
+          "sr_id": "sr:match:46798659",
+          "game_type": "playoff",
+          "conference_game": true,
+          "title": "AFC Wild Card",
+          "venue": {
+              "id": "2ec4c411-dac2-403d-b091-6b6aa4a0a914",
+              "name": "GEHA Field at Arrowhead Stadium",
+              "city": "Kansas City",
+              "state": "MO",
+              "country": "USA",
+              "zip": "64129",
+              "address": "One Arrowhead Drive",
+              "capacity": 76416,
+              "surface": "turf",
+              "roof_type": "outdoor",
+              "sr_id": "sr:venue:8189",
+              "location": {
+                  "lat": "39.049019",
+                  "lng": "-94.484140"
+              }
+          },
+          "home": {
+              "id": "6680d28d-d4d2-49f6-aace-5292d3ec02c2",
+              "name": "Kansas City Chiefs",
+              "alias": "KC",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4422"
+          },
+          "away": {
+              "id": "4809ecb0-abd3-451d-9c4a-92a90b83ca06",
+              "name": "Miami Dolphins",
+              "alias": "MIA",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4287"
+          },
+          "broadcast": {
+              "network": "Peacock"
+          }
+      }, {
+          "id": "00f7866b-087f-4073-bccc-28439136eb11",
+          "status": "scheduled",
+          "scheduled": "2024-01-14T18:00:00+00:00",
+          "entry_mode": "LDE",
+          "sr_id": "sr:match:46798657",
+          "game_type": "playoff",
+          "conference_game": true,
+          "title": "AFC Wild Card",
+          "venue": {
+              "id": "e9e0828e-37fc-4238-a317-49037577dd55",
+              "name": "Highmark Stadium",
+              "city": "Orchard Park",
+              "state": "NY",
+              "country": "USA",
+              "zip": "14127",
+              "address": "One Bills Drive",
+              "capacity": 71608,
+              "surface": "artificial",
+              "roof_type": "outdoor",
+              "sr_id": "sr:venue:8171",
+              "location": {
+                  "lat": "42.773826",
+                  "lng": "-78.786589"
+              }
+          },
+          "home": {
+              "id": "768c92aa-75ff-4a43-bcc0-f2798c2e1724",
+              "name": "Buffalo Bills",
+              "alias": "BUF",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4376"
+          },
+          "away": {
+              "id": "cb2f9f1f-ac67-424e-9e72-1475cb0ed398",
+              "name": "Pittsburgh Steelers",
+              "alias": "PIT",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4345"
+          },
+          "broadcast": {
+              "network": "CBS"
+          }
+      }, {
+          "id": "8f6c8cf1-a5bf-4726-8bfa-c804451c3c05",
+          "status": "scheduled",
+          "scheduled": "2024-01-14T21:30:00+00:00",
+          "entry_mode": "LDE",
+          "sr_id": "sr:match:46792871",
+          "game_type": "playoff",
+          "conference_game": false,
+          "title": "NFC Wild Card",
+          "venue": {
+              "id": "1e84213a-ff1f-4c9d-a003-8ee782b25a40",
+              "name": "AT&T Stadium",
+              "city": "Arlington",
+              "state": "TX",
+              "country": "USA",
+              "zip": "76011",
+              "address": "One Legends Way",
+              "capacity": 80000,
+              "surface": "artificial",
+              "roof_type": "retractable_dome",
+              "sr_id": "sr:venue:6650",
+              "location": {
+                  "lat": "32.747778",
+                  "lng": "-97.092778"
+              }
+          },
+          "home": {
+              "id": "e627eec7-bbae-4fa4-8e73-8e1d6bc5c060",
+              "name": "Dallas Cowboys",
+              "alias": "DAL",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4392"
+          },
+          "away": {
+              "id": "a20471b4-a8d9-40c7-95ad-90cc30e46932",
+              "name": "Green Bay Packers",
+              "alias": "GB",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4420"
+          },
+          "broadcast": {
+              "network": "FOX"
+          }
+      }, {
+          "id": "dae4eee1-0371-40c7-b0dd-cafb0c006ebd",
+          "status": "scheduled",
+          "scheduled": "2024-01-15T01:15:00+00:00",
+          "entry_mode": "LDE",
+          "sr_id": "sr:match:46792873",
+          "game_type": "playoff",
+          "conference_game": false,
+          "title": "NFC Wild Card",
+          "venue": {
+              "id": "6e3bcf22-277d-4c06-b019-62aded51654f",
+              "name": "Ford Field",
+              "city": "Detroit",
+              "state": "MI",
+              "country": "USA",
+              "zip": "48226",
+              "address": "2000 Brush Street",
+              "capacity": 65000,
+              "surface": "artificial",
+              "roof_type": "dome",
+              "sr_id": "sr:venue:8181",
+              "location": {
+                  "lat": "42.339958",
+                  "lng": "-83.045636"
+              }
+          },
+          "home": {
+              "id": "c5a59daa-53a7-4de0-851f-fb12be893e9e",
+              "name": "Detroit Lions",
+              "alias": "DET",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4419"
+          },
+          "away": {
+              "id": "2eff2a03-54d4-46ba-890e-2bc3925548f3",
+              "name": "Los Angeles Rams",
+              "alias": "LA",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4387"
+          },
+          "broadcast": {
+              "network": "NBC"
+          }
+      }, {
+          "id": "1b3ab572-3d65-4dd8-8906-480f1ed79f9c",
+          "status": "scheduled",
+          "scheduled": "2024-01-16T01:15:00+00:00",
+          "entry_mode": "LDE",
+          "sr_id": "sr:match:46792861",
+          "game_type": "playoff",
+          "conference_game": false,
+          "title": "NFC Wild Card",
+          "venue": {
+              "id": "6fccc39c-80bc-4c81-83d9-2d5a848c8c09",
+              "name": "Raymond James Stadium",
+              "city": "Tampa",
+              "state": "FL",
+              "country": "USA",
+              "zip": "33607",
+              "address": "4201 North Dale Mabry Highway",
+              "capacity": 69218,
+              "surface": "turf",
+              "roof_type": "outdoor",
+              "sr_id": "sr:venue:8205",
+              "location": {
+                  "lat": "27.976211",
+                  "lng": "-82.503625"
+              }
+          },
+          "home": {
+              "id": "4254d319-1bc7-4f81-b4ab-b5e6f3402b69",
+              "name": "Tampa Bay Buccaneers",
+              "alias": "TB",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4388"
+          },
+          "away": {
+              "id": "386bdbf9-9eea-4869-bb9a-274b0bc66e80",
+              "name": "Philadelphia Eagles",
+              "alias": "PHI",
+              "game_number": 1,
+              "sr_id": "sr:competitor:4428"
+          },
+          "broadcast": {
+              "network": "ABC/ESPN",
+              "satellite": "206"
+          }
+      }]
+  },
+  "_comment": "Generation started @ 2024-01-09 18:00:42 UTC ended @ 2024-01-09 18:00:42 UTC"
+}
