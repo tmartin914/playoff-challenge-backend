@@ -5,7 +5,7 @@ const Op = db.Sequelize.Op;
 
 const fs = require("fs-extra")
 const path = require('path');
-const playerDataJson = path.resolve('./players.json');
+const playerDataJson = path.resolve('./backend/players.json'); //'./players.json');
 
 exports.findAll = (req, res) => {
   console.log('findAll');
@@ -25,7 +25,7 @@ exports.submitLineup = (req, res) => {
   const lineup = {
     teamId: req.body.teamId,
     teamName: "My Team",
-    week: "1",
+    round: req.body.round,
     qbId: req.body.qb,
     rb1Id: req.body.rb1,
     rb2Id: req.body.rb2,
@@ -36,7 +36,7 @@ exports.submitLineup = (req, res) => {
     kId: req.body.k
   }
 
-  Lineup.findOne({ where: {teamId: lineup.teamId, week: lineup.week}})
+  Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
     .then(data => {
       if (data) {
         data.update(lineup);
@@ -47,7 +47,7 @@ exports.submitLineup = (req, res) => {
 }
 
 exports.getLineup = (req, res) => {
-  Lineup.findOne({ where: {teamId: req.params.teamId, week: "1"}})
+  Lineup.findOne({ where: {teamId: req.params.teamId, round: req.params.round}})
     .then(data => {
       if (data) {
         res.send(data);
@@ -62,7 +62,6 @@ const applicablePositions = ['QB', 'RB', 'FB', 'WR', 'RWR', 'LWR', 'TE'];
 exports.populateTable = async (req, res) => {
   console.log('populateTable');
 
-  // TODO: does not have bye week teams
   const playerData = await fs.readJson(playerDataJson);
   const players = [];
   playerData.teams.forEach(team => {

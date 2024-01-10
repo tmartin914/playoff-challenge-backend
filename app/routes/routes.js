@@ -5,7 +5,7 @@ module.exports = app => {
 
   router.get("/", players.findAll);
   router.get("/load", players.populateTable);
-  router.get("/lineup/:teamId", players.getLineup);
+  router.get("/lineup/:teamId/:round", players.getLineup);
   router.post("/submitLineup", players.submitLineup);
 
   app.use('/api/players', router);

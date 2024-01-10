@@ -7,8 +7,9 @@ module.exports = (sequelize, Sequelize) => {
     teamName: {
       type: Sequelize.STRING
     },
-    week: {
-      type: Sequelize.STRING
+    round: {
+      type: Sequelize.STRING,
+      primaryKey: true
     },
     qbId: {
       type: Sequelize.STRING
