@@ -10,8 +10,8 @@ const { QueryTypes } = require('sequelize');
 
 // TODO: make all of these kinds of things set by an env var
 // ABCD
-//const playerDataJson = path.resolve('./backend/players.json'); // local
-//const weekScheduleJson = path.resolve('./backend/weekSchedule.json');
+// const playerDataJson = path.resolve('./backend/players.json'); // local
+// const weekScheduleJson = path.resolve('./backend/weekSchedule.json');
 
 const playerDataJson = path.resolve('./players.json'); // deploy
 const weekScheduleJson = path.resolve('./weekSchedule.json');
@@ -62,7 +62,7 @@ exports.submitLineup = (req, res) => {
         }
       
         const currentDateTime = new Date();
-        const lockAllineups = new Date(2024, 1, 12, 14, 14, 0);
+        const lockAllineups = new Date(2024, 0, 12, 14, 14, 0);
         if (currentDateTime > lockAllineups) {
           res.send({isSuccessful: false, message: `All lineups are locked for the week, could not create lineup`});
         } else {
