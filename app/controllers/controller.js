@@ -62,54 +62,60 @@ exports.submitLineup = (req, res) => {
         }
       
         const currentDateTime = new Date();
-        console.log(`Submit Lineup request for ${lineup.teamId} at ${currentDateTime}: ${lineup.qbId}, ${lineup.rb1Id}, ${lineup.rb2Id}, ${lineup.wr1Id}, ${lineup.wr2Id}, ${lineup.teId}, ${lineup.kId}, ${lineup.dstId}`);
-      
-        let existingLineup;
-        Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
-          .then(data => {
-            if (data) {
-              existingLineup = data;
-            }
-      
-            // check that all players' games have not already started
-            let isError = false;
-            playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
-            Player.findAll({ where: { id: { [Op.in]: playerIds }}})
-              .then(players => {
-                try {
-                  players.forEach(player => {
-                    if (player.gameTime != null && player.gameTime <= currentDateTime) {
-                      if (!existingLineup || !isPlayerInLineup(player.id, existingLineup)) { // if player is not in the existing lineup then throw an error
-                        console.log(`Game for ${player.name} has already started`);
-                        throw new Error(`Game for ${player.name} has already started`);
+        const lockAllineups = new Date(2024, 1, 15, 14, 10, 0);
+        if (currentDateTime > lockAllineups) {
+          res.send({isSuccessful: false, message: `All lineups are locked for the week, could not create lineup`});
+        } else {
+          //const lockAllineups = new Date(2024, 1, 12, 20, 30, 0);
+          console.log(`Submit Lineup request for ${lineup.teamId} at ${currentDateTime}: ${lineup.qbId}, ${lineup.rb1Id}, ${lineup.rb2Id}, ${lineup.wr1Id}, ${lineup.wr2Id}, ${lineup.teId}, ${lineup.kId}, ${lineup.dstId}`);
+        
+          let existingLineup;
+          Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
+            .then(data => {
+              if (data) {
+                existingLineup = data;
+              }
+        
+              // check that all players' games have not already started
+              let isError = false;
+              playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
+              Player.findAll({ where: { id: { [Op.in]: playerIds }}})
+                .then(players => {
+                  try {
+                    players.forEach(player => {
+                      if (player.gameTime != null && player.gameTime <= currentDateTime) {
+                        if (!existingLineup || !isPlayerInLineup(player.id, existingLineup)) { // if player is not in the existing lineup then throw an error
+                          console.log(`Game for ${player.name} has already started`);
+                          throw new Error(`Game for ${player.name} has already started`);
+                        }
                       }
-                    }
-                  });
-                } catch (e) {
-                  isError = true;
-                  res.send({isSuccessful: false, message: e.message});
-                }
-      
-                if (!isError) {
-                  Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
-                    .then(data => {
-                      if (data) {
-                        data.update(lineup);
-                        console.log('Lineup successfully updated');
-                        res.send({isSuccessful: true, message: `Lineup successfully updated`});
-                      } else {
-                        Lineup.create(lineup);
-                        console.log('Lineup successfully created');
-                        res.send({isSuccessful: true, message: `Lineup successfully created`});
-                      }
-                    })
-                    .catch(err => {
-                      console.log('Lineup failed' + err);
-                      res.send({isSuccessful: false, message: `Internal error, could not create lineup`});
                     });
+                  } catch (e) {
+                    isError = true;
+                    res.send({isSuccessful: false, message: e.message});
                   }
-              });
-          });
+        
+                  if (!isError) {
+                    Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
+                      .then(data => {
+                        if (data) {
+                          data.update(lineup);
+                          console.log('Lineup successfully updated');
+                          res.send({isSuccessful: true, message: `Lineup successfully updated`});
+                        } else {
+                          Lineup.create(lineup);
+                          console.log('Lineup successfully created');
+                          res.send({isSuccessful: true, message: `Lineup successfully created`});
+                        }
+                      })
+                      .catch(err => {
+                        console.log('Lineup failed' + err);
+                        res.send({isSuccessful: false, message: `Internal error, could not create lineup`});
+                      });
+                    }
+                });
+            });
+        }
       } else {
         console.log('Invalid Team ID');
         res.send({isSuccessful: false, message: `Invalid Team ID, could not create lineup`});
