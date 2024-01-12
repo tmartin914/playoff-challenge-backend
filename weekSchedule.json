@@ -10,7 +10,7 @@
       "games": [{
           "id": "c2e79f3f-2a4d-437d-a48a-8d1b18f443d2",
           "status": "scheduled",
-          "scheduled": "2024-01-12T19:05:00+00:00",
+          "scheduled": "2024-01-13T21:30:00+00:00",
           "entry_mode": "LDE",
           "sr_id": "sr:match:46792587",
           "game_type": "playoff",
@@ -53,7 +53,7 @@
       }, {
           "id": "cc23f026-32ea-4c2a-8f6d-c873a6844178",
           "status": "scheduled",
-          "scheduled": "2024-01-12T19:06:00+00:00",
+          "scheduled": "2024-01-14T01:00:00+00:00",
           "entry_mode": "LDE",
           "sr_id": "sr:match:46798659",
           "game_type": "playoff",
@@ -96,7 +96,7 @@
       }, {
           "id": "00f7866b-087f-4073-bccc-28439136eb11",
           "status": "scheduled",
-          "scheduled": "2024-01-12T19:07:00+00:00",
+          "scheduled": "2024-01-14T18:00:00+00:00",
           "entry_mode": "LDE",
           "sr_id": "sr:match:46798657",
           "game_type": "playoff",
@@ -139,7 +139,7 @@
       }, {
           "id": "8f6c8cf1-a5bf-4726-8bfa-c804451c3c05",
           "status": "scheduled",
-          "scheduled": "2024-01-12T19:08:00+00:00",
+          "scheduled": "2024-01-14T21:30:00+00:00",
           "entry_mode": "LDE",
           "sr_id": "sr:match:46792871",
           "game_type": "playoff",
@@ -182,7 +182,7 @@
       }, {
           "id": "dae4eee1-0371-40c7-b0dd-cafb0c006ebd",
           "status": "scheduled",
-          "scheduled": "2024-01-12T19:09:00+00:00",
+          "scheduled": "2024-01-15T01:15:00+00:00",
           "entry_mode": "LDE",
           "sr_id": "sr:match:46792873",
           "game_type": "playoff",
@@ -225,7 +225,7 @@
       }, {
           "id": "1b3ab572-3d65-4dd8-8906-480f1ed79f9c",
           "status": "scheduled",
-          "scheduled": "2024-01-12T18:55:00+00:00",
+          "scheduled": "2024-01-16T01:15:00+00:00",
           "entry_mode": "LDE",
           "sr_id": "sr:match:46792861",
           "game_type": "playoff",
