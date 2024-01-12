@@ -7,6 +7,9 @@ module.exports = app => {
   router.get("/load", players.populateTable);
   router.get("/lineup/:teamId/:round", players.getLineup);
   router.post("/submitLineup", players.submitLineup);
+  router.get("/getStandings", players.getStandings);
+  router.get("/getTeam/:teamName", players.getTeam); // TODO: add round
+  router.get("/createTeam/:teamId/:teamName", players.createTeam);
 
   app.use('/api/players', router);
 };

@@ -1,10 +1,13 @@
 const db = require("../models");
 const Player = db.players;
 const Lineup = db.lineups;
+const Team = db.teams;
 const Op = db.Sequelize.Op;
 
 const fs = require("fs-extra")
 const path = require('path');
+const { QueryTypes } = require('sequelize');
+
 // TODO: make all of these kinds of things set by an env var
 const playerDataJson = path.resolve('./backend/players.json'); //'./players.json');
 const weekScheduleJson = path.resolve('./backend/weekSchedule.json'); //'./weekSchedule.json');
@@ -37,71 +40,77 @@ const isPlayerInLineup = (playerId, lineup) => {
 }
 
 exports.submitLineup = (req, res) => {
-  const lineup = {
-    teamId: req.body.teamId,
-    teamName: "My Team",
-    round: req.body.round,
-    qbId: req.body.qb,
-    rb1Id: req.body.rb1,
-    rb2Id: req.body.rb2,
-    wr1Id: req.body.wr1,
-    wr2Id: req.body.wr2,
-    teId: req.body.te,
-    dstId: req.body.dst,
-    kId: req.body.k
-  }
-
-  const currentDateTime = new Date();
-  console.log(`Submit Lineup request for ${lineup.teamId} at ${currentDateTime}: ${lineup.qbId}, ${lineup.rb1Id}, ${lineup.rb2Id}, ${lineup.wr1Id}, ${lineup.wr2Id}, ${lineup.teId}, ${lineup.kId}, ${lineup.dstId}`);
-
-  let existingLineup;
-  Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
+  Team.findOne({ where: {teamId: req.body.teamId}})
     .then(data => {
       if (data) {
-        existingLineup = data;
-      }
-
-      // check that all players' games have not already started
-      let isError = false;
-      playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
-      Player.findAll({ where: { id: { [Op.in]: playerIds }}})
-        .then(players => {
-          try {
-            players.forEach(player => {
-              if (player.gameTime != null && player.gameTime <= currentDateTime) {
-                if (!existingLineup || !isPlayerInLineup(playerId, existinLineup)) { // if player is not in the existing lineup then throw an error
-                  console.log(`Game for ${player.name} has already started`);
-                  throw new Error(`Game for ${player.name} has already started`);
-                }
-              }
-            });
-          } catch (e) {
-            isError = true;
-            res.send({isSuccessful: false, message: e.message});
-          }
-
-          if (!isError) {
-            Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
-              .then(data => {
-                if (data) {
-                  data.update(lineup);
-                  console.log('Lineup successfully updated');
-                  res.send({isSuccessful: true, message: `Lineup successfully updated`});
-                } else {
-                  Lineup.create(lineup);
-                  console.log('Lineup successfully created');
-                  res.send({isSuccessful: true, message: `Lineup successfully created`});
-                }
-              })
-              .catch(err => {
-                console.log('Lineup failed' + err);
-                res.send({isSuccessful: false, message: `Internal error, could not create lineup`});
-                return;
-              });
+        const lineup = {
+          teamId: req.body.teamId,
+          teamName: data.teamName,
+          round: req.body.round,
+          qbId: req.body.qb,
+          rb1Id: req.body.rb1,
+          rb2Id: req.body.rb2,
+          wr1Id: req.body.wr1,
+          wr2Id: req.body.wr2,
+          teId: req.body.te,
+          dstId: req.body.dst,
+          kId: req.body.k
+        }
+      
+        const currentDateTime = new Date();
+        console.log(`Submit Lineup request for ${lineup.teamId} at ${currentDateTime}: ${lineup.qbId}, ${lineup.rb1Id}, ${lineup.rb2Id}, ${lineup.wr1Id}, ${lineup.wr2Id}, ${lineup.teId}, ${lineup.kId}, ${lineup.dstId}`);
+      
+        let existingLineup;
+        Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
+          .then(data => {
+            if (data) {
+              existingLineup = data;
             }
-        });
-      //});
-    });
+      
+            // check that all players' games have not already started
+            let isError = false;
+            playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
+            Player.findAll({ where: { id: { [Op.in]: playerIds }}})
+              .then(players => {
+                try {
+                  players.forEach(player => {
+                    if (player.gameTime != null && player.gameTime <= currentDateTime) {
+                      if (!existingLineup || !isPlayerInLineup(player.id, existingLineup)) { // if player is not in the existing lineup then throw an error
+                        console.log(`Game for ${player.name} has already started`);
+                        throw new Error(`Game for ${player.name} has already started`);
+                      }
+                    }
+                  });
+                } catch (e) {
+                  isError = true;
+                  res.send({isSuccessful: false, message: e.message});
+                }
+      
+                if (!isError) {
+                  Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
+                    .then(data => {
+                      if (data) {
+                        data.update(lineup);
+                        console.log('Lineup successfully updated');
+                        res.send({isSuccessful: true, message: `Lineup successfully updated`});
+                      } else {
+                        Lineup.create(lineup);
+                        console.log('Lineup successfully created');
+                        res.send({isSuccessful: true, message: `Lineup successfully created`});
+                      }
+                    })
+                    .catch(err => {
+                      console.log('Lineup failed' + err);
+                      res.send({isSuccessful: false, message: `Internal error, could not create lineup`});
+                    });
+                  }
+              });
+          });
+      } else {
+        console.log('Invalid Team ID');
+        res.send({isSuccessful: false, message: `Invalid Team ID, could not create lineup`});
+      }
+    })
 }
 
 exports.getLineup = (req, res) => {
@@ -112,6 +121,36 @@ exports.getLineup = (req, res) => {
       } else {
         res.send(null);
       }
+    })
+}
+
+const getPlayerIfLocked = (playerId, players) => {
+  const currentDateTime = new Date();
+  const player = players.find(p => p.id == playerId);
+  if (player.gameTime != null && player.gameTime <= currentDateTime) {
+    return player;
+  } else {
+    return undefined;
+  }
+}
+
+exports.getTeam = (req, res) => {
+  const lineupToReturn = {};
+  Lineup.findOne({ where: {teamName: req.params.teamName, round: 'Wildcard'}})
+    .then(lineup => {
+      playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
+      Player.findAll({ where: { id: { [Op.in]: playerIds }}, raw: true})
+        .then(players => {
+          lineupToReturn.qb = getPlayerIfLocked(lineup.qbId, players);
+          lineupToReturn.rb1 = getPlayerIfLocked(lineup.rb1Id, players);
+          lineupToReturn.rb2 = getPlayerIfLocked(lineup.rb2Id, players);
+          lineupToReturn.wr1 = getPlayerIfLocked(lineup.wr1Id, players);
+          lineupToReturn.wr2 = getPlayerIfLocked(lineup.wr2Id, players);
+          lineupToReturn.te = getPlayerIfLocked(lineup.teId, players);
+          lineupToReturn.k = getPlayerIfLocked(lineup.kId, players);
+          lineupToReturn.dst = getPlayerIfLocked(lineup.dstId, players);
+          res.send(lineupToReturn);
+        });
     })
 }
 
@@ -180,3 +219,18 @@ createPlayer = (player) => {
       //return false;
     });
 };
+
+exports.getStandings = async (req, res) => {
+  const teams = await db.sequelize.query("SELECT teamName FROM `teams`", { type: QueryTypes.SELECT });
+  res.send(teams);
+}
+
+exports.createTeam = async (req, res) => {
+  Team.create({ teamId: req.params.teamId, teamName: req.params.teamName})
+  .then(data => {
+  })
+  .catch(err => {
+    console.log(err.message);
+  });
+  res.send();
+}
