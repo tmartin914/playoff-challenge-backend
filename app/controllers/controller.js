@@ -9,8 +9,12 @@ const path = require('path');
 const { QueryTypes } = require('sequelize');
 
 // TODO: make all of these kinds of things set by an env var
-const playerDataJson = path.resolve('./backend/players.json'); //'./players.json');
-const weekScheduleJson = path.resolve('./backend/weekSchedule.json'); //'./weekSchedule.json');
+// ABCD
+//const playerDataJson = path.resolve('./backend/players.json'); // local
+//const weekScheduleJson = path.resolve('./backend/weekSchedule.json');
+
+const playerDataJson = path.resolve('./players.json'); // deploy
+const weekScheduleJson = path.resolve('./weekSchedule.json');
 
 exports.findAll = (req, res) => {
   var currentDateTime = new Date();
