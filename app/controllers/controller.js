@@ -5,12 +5,22 @@ const Op = db.Sequelize.Op;
 
 const fs = require("fs-extra")
 const path = require('path');
+// TODO: make all of these kinds of things set by an env var
 const playerDataJson = path.resolve('./backend/players.json'); //'./players.json');
+const weekScheduleJson = path.resolve('./backend/weekSchedule.json'); //'./weekSchedule.json');
 
 exports.findAll = (req, res) => {
-  console.log('findAll');
+  var currentDateTime = new Date();
   Player.findAll({ where: { available: true } })
     .then(data => {
+      // lock players who's games already started
+      data.forEach(player => {
+        if (player.gameTime == null || player.gameTime >= currentDateTime) {
+          player.dataValues.locked = false;
+        } else {
+          player.dataValues.locked = true;
+        }
+      });
       res.send(data);
     })
     .catch(err => {
@@ -20,6 +30,11 @@ exports.findAll = (req, res) => {
       });
     });
 };
+
+const isPlayerInLineup = (playerId, lineup) => {
+  playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
+  return playerIds.includes(playerId);
+}
 
 exports.submitLineup = (req, res) => {
   const lineup = {
@@ -36,14 +51,57 @@ exports.submitLineup = (req, res) => {
     kId: req.body.k
   }
 
+  const currentDateTime = new Date();
+  console.log(`Submit Lineup request for ${lineup.teamId} at ${currentDateTime}: ${lineup.qbId}, ${lineup.rb1Id}, ${lineup.rb2Id}, ${lineup.wr1Id}, ${lineup.wr2Id}, ${lineup.teId}, ${lineup.kId}, ${lineup.dstId}`);
+
+  let existingLineup;
   Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
     .then(data => {
       if (data) {
-        data.update(lineup);
-      } else {
-        Lineup.create(lineup);
+        existingLineup = data;
       }
-    })
+
+      // check that all players' games have not already started
+      let isError = false;
+      playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
+      Player.findAll({ where: { id: { [Op.in]: playerIds }}})
+        .then(players => {
+          try {
+            players.forEach(player => {
+              if (player.gameTime != null && player.gameTime <= currentDateTime) {
+                if (!existingLineup || !isPlayerInLineup(playerId, existinLineup)) { // if player is not in the existing lineup then throw an error
+                  console.log(`Game for ${player.name} has already started`);
+                  throw new Error(`Game for ${player.name} has already started`);
+                }
+              }
+            });
+          } catch (e) {
+            isError = true;
+            res.send({isSuccessful: false, message: e.message});
+          }
+
+          if (!isError) {
+            Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
+              .then(data => {
+                if (data) {
+                  data.update(lineup);
+                  console.log('Lineup successfully updated');
+                  res.send({isSuccessful: true, message: `Lineup successfully updated`});
+                } else {
+                  Lineup.create(lineup);
+                  console.log('Lineup successfully created');
+                  res.send({isSuccessful: true, message: `Lineup successfully created`});
+                }
+              })
+              .catch(err => {
+                console.log('Lineup failed' + err);
+                res.send({isSuccessful: false, message: `Internal error, could not create lineup`});
+                return;
+              });
+            }
+        });
+      //});
+    });
 }
 
 exports.getLineup = (req, res) => {
@@ -62,19 +120,31 @@ const applicablePositions = ['QB', 'RB', 'FB', 'WR', 'RWR', 'LWR', 'TE'];
 exports.populateTable = async (req, res) => {
   console.log('populateTable');
 
+  const weekScheduleData = await fs.readJson(weekScheduleJson);
+  const teamGameTimes = {};
+
+  // update the team game times dictionary
+  weekScheduleData.week.games.forEach(game => {
+    homeTeamAlias = game.home.alias;
+    awayTeamAlias = game.away.alias;
+    gameTime = game.scheduled;
+    teamGameTimes[homeTeamAlias] = gameTime;
+    teamGameTimes[awayTeamAlias] = gameTime;
+  });
+
   const playerData = await fs.readJson(playerDataJson);
   const players = [];
   playerData.teams.forEach(team => {
+    teamGameTime = teamGameTimes[team.alias];
     const tempPlayerArrays = team.offense.filter(p => applicablePositions.includes(p.position.name)).map(p => p.position.players);
     tempPlayerArrays.push(team.special_teams.find(p => p.position.name === 'K').position.players);
     tempPlayerArrays.forEach(playersArray => {
       playersArray.forEach(player => {
-        // TODO: need to properly set available
-        players.push({ id: player.id, name: player.name, team: team.name, position: player.position, available: true });
+        players.push({ id: player.id, name: player.name, team: team.name, position: player.position, available: true, gameTime: teamGameTime });
       });
     });
 
-    players.push({ id: team.id, name: team.name, team: team.name, position: 'DST', available: true })
+    players.push({ id: team.id, name: team.name, team: team.name, position: 'DST', available: true, gameTime: teamGameTime })
   });
 
   Player.destroy({

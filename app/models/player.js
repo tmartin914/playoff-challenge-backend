@@ -16,6 +16,9 @@ module.exports = (sequelize, Sequelize) => {
     },
     available: {
       type: Sequelize.BOOLEAN
+    },
+    gameTime: {
+      type: Sequelize.DATE
     }
   });
 
