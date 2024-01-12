@@ -20,7 +20,9 @@ db.sequelize.sync();
 
 require("./app/routes/routes.js")(app);
 
-const PORT = process.env.PORT || 8080//3000;//8080;
+// ABCD
+const PORT = process.env.PORT || 3000; // deploy
+//const PORT = process.env.PORT || 8080; // local
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}"`);
 });
