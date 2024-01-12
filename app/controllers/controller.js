@@ -154,7 +154,11 @@ exports.getTeam = (req, res) => {
           lineupToReturn.k = getPlayerIfLocked(lineup.kId, players);
           lineupToReturn.dst = getPlayerIfLocked(lineup.dstId, players);
           res.send(lineupToReturn);
+        }).catch(err => {
+
         });
+    }).catch(err => {
+      
     })
 }
 
