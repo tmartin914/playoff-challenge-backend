@@ -62,7 +62,7 @@ exports.submitLineup = (req, res) => {
         }
       
         const currentDateTime = new Date();
-        const lockAllineups = new Date(2024, 0, 12, 25, 14, 0);
+        const lockAllineups = new Date(2024, 0, 12, 14, 28, 0);
         if (currentDateTime > lockAllineups) {
           res.send({isSuccessful: false, message: `All lineups are locked for the week, could not create lineup`});
         } else {
