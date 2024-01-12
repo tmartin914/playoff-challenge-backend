@@ -12,11 +12,11 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 const db = require("./app/models");
-//db.sequelize.sync();
+db.sequelize.sync();
 // TODO: used for dev only
-db.sequelize.sync({ force: true }).then(() => {
-  console.log("Drop and re-sync db.");
-});
+// db.sequelize.sync({ force: true }).then(() => {
+//   console.log("Drop and re-sync db.");
+// });
 
 require("./app/routes/routes.js")(app);
 
