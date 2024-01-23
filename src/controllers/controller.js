@@ -2,19 +2,21 @@ const db = require("../models");
 const Player = db.players;
 const Lineup = db.lineups;
 const Team = db.teams;
+const GameStat = db.gameStats;
 const Op = db.Sequelize.Op;
 
-const fs = require("fs-extra")
+const GameReader = require("../library/game-reader.js");
+const fs = require("fs-extra");
 const path = require('path');
 const { QueryTypes } = require('sequelize');
 
-// TODO: make all of these kinds of things set by an env var
-// ABCD
-// const playerDataJson = path.resolve('./backend/players.json'); // local
-// const weekScheduleJson = path.resolve('./backend/weekSchedule.json');
+// TODO: make REST requests instead of reading from JSON files
+const BASE_PATH = process.env.LOCAL_DEV ? './backend' : '.';
+const playerDataPath = path.resolve(`${BASE_PATH}/players.json`);
+const weekSchedulePath = path.resolve(`${BASE_PATH}/weekSchedule.json`);
+const houstonGamePath = path.resolve(`${BASE_PATH}/games/houston.json`);
 
-const playerDataJson = path.resolve('./players.json'); // deploy
-const weekScheduleJson = path.resolve('./weekSchedule.json');
+const APPLICABLE_POSITIONS = ['QB', 'RB', 'FB', 'WR', 'RWR', 'LWR', 'TE'];
 
 exports.findAll = (req, res) => {
   var currentDateTime = new Date();
@@ -173,12 +175,18 @@ exports.getTeam = (req, res) => {
     })
 }
 
-const applicablePositions = ['QB', 'RB', 'FB', 'WR', 'RWR', 'LWR', 'TE'];
+// TODO: remove
+populateGameStats = async () => {
+  const gameData = await fs.readJSON(houstonGamePath);
+  const gameReader = new GameReader(GameStat);
+  gameReader.read(gameData);
+}
 
-exports.populateTable = async (req, res) => {
-  console.log('populateTable');
 
-  const weekScheduleData = await fs.readJson(weekScheduleJson);
+
+exports.populateDB = async (req, res) => {
+  // Populate Week Schedule
+  const weekScheduleData = await fs.readJson(weekSchedulePath);
   const teamGameTimes = {};
 
   // update the team game times dictionary
@@ -190,11 +198,12 @@ exports.populateTable = async (req, res) => {
     teamGameTimes[awayTeamAlias] = gameTime;
   });
 
-  const playerData = await fs.readJson(playerDataJson);
+  // Populate Rosters
+  const playerData = await fs.readJson(playerDataPath);
   const players = [];
   playerData.teams.forEach(team => {
     teamGameTime = teamGameTimes[team.alias];
-    const tempPlayerArrays = team.offense.filter(p => applicablePositions.includes(p.position.name)).map(p => p.position.players);
+    const tempPlayerArrays = team.offense.filter(p => APPLICABLE_POSITIONS.includes(p.position.name)).map(p => p.position.players);
     tempPlayerArrays.push(team.special_teams.find(p => p.position.name === 'K').position.players);
     tempPlayerArrays.forEach(playersArray => {
       playersArray.forEach(player => {
@@ -219,24 +228,31 @@ exports.populateTable = async (req, res) => {
       });
     });
 
+  week = 'Wildcard'
   players.forEach(player => {
-    createPlayer(player);
+    createPlayer(player, week);
   });
+
+  // Populate Game Stats
+  populateGameStats();
 };
 
-createPlayer = (player) => {
+createPlayer = (player, week) => {
   Player.create(player)
     .then(data => {
-      //return true;
     })
     .catch(err => {
       console.log(err.message);
-      // res.status(500).send({
-      //   message:
-      //     err.message || "Some error occurred while creating the Player"
-      // });
-      //return false;
     });
+
+  gameStat = {
+    playerId: player.Id,
+    week: week,
+    totalPoints: 0,
+    statSummary: ''
+  }
+
+  GameStat.create(gameStat).catch(err => console.log(err.message));
 };
 
 exports.getStandings = async (req, res) => {

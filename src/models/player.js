@@ -1,3 +1,6 @@
+/**
+ * Defines the Player DB table
+ */
 module.exports = (sequelize, Sequelize) => {
   const Player = sequelize.define("player", {
     id: {

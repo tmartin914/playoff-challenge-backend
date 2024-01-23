@@ -1,3 +1,6 @@
+/**
+ * Defines the Lineup DB table
+ */
 module.exports = (sequelize, Sequelize) => {
   const Lineup = sequelize.define("lineup", {
     teamId: {
