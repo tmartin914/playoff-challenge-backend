@@ -1,29 +1,42 @@
-const GameStat = require("../models/gameStat.js");
-const DstGameStat = require("../models/dstGameStat.js");
-
 /**
  * Class for reading game data and updating the DB
  */
 class GameReader {
   /**
    * Constructor
-   * @param {*} GameStats - game stats sequelize model
+   * @param {*} GameStat - game stats sequelize model
+   * @param {*} DstGameStat - DST game stats sequelize model
    */
-  constructor(GameStats) {
-    this.GameStats = GameStats
+  constructor(GameStat, DstGameStat) {
+    this.GameStat = GameStat;
+    this.DstGameStat = DstGameStat;
   }
 
   saveGameStats(gameStats, dstGameStats) {
-    // TODO: save to DB
+    this.GameStat.bulkCreate(gameStats, { updateOnDuplicate: ["playerId", "week"] })
+      .then(resp => {
+        
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+    this.DstGameStat.bulkCreate(dstGameStats, { updateOnDuplicate: ["playerId", "week"] })
+      .then(resp => {
+        
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 
   async updateGameStats(gameData) {
-    GameStat.findAll()
+    this.GameStat.findAll()
       .then(gameStats => {
-        DstGameStat.findAll()
+        this.DstGameStat.findAll()
           .then(dstGameStats => {
-            updateGameStats(gameData, gameStats, dstGameStats);
-            saveGameStats(gameStats, dstGameStats);
+            this.parseGameStats(gameData, gameStats, dstGameStats);
+            this.saveGameStats(gameStats, dstGameStats);
           })
           .catch(err => {
             console.log(err);
@@ -127,12 +140,12 @@ class GameReader {
   }
 
   /**
-   * Parses JSON and updates the DB
+   * Parses JSON into game stats
    * @param {*} gameData - game data as JSON
    * @param {*} gameStats - game stats
    * @param {*} dstGameStats - DST game stats  
    */
-  updateGameStats(gameData, gameStats, dstGameStats) {
+  parseGameStats(gameData, gameStats, dstGameStats) {
     this.clearIncrementalGameStats(gameStats);
     const home = gameData.statistics.home;
     const away = gameData.statistics.away;

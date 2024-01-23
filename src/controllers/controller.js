@@ -3,6 +3,7 @@ const Player = db.players;
 const Lineup = db.lineups;
 const Team = db.teams;
 const GameStat = db.gameStats;
+const DstGameStat = db.dstGameStats;
 const Op = db.Sequelize.Op;
 
 const GameReader = require("../library/game-reader.js");
@@ -175,11 +176,13 @@ exports.getTeam = (req, res) => {
     })
 }
 
-// TODO: remove
+/**
+ * Populate the game stats in the DB
+ */
 populateGameStats = async () => {
   const gameData = await fs.readJSON(houstonGamePath);
-  const gameReader = new GameReader(GameStat);
-  gameReader.read(gameData);
+  const gameReader = new GameReader(GameStat, DstGameStat);
+  gameReader.updateGameStats(gameData);
 }
 
 

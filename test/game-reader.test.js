@@ -6,7 +6,7 @@ describe("Game Reader Tests", () => {
     const gameReader = new GameReader(null);
     const gameStats = [];
     const dstGameStats = [];
-    gameReader.updateGameStats(gameData, gameStats, dstGameStats);
+    gameReader.parseGameStats(gameData, gameStats, dstGameStats);
 
     // Test Passing / Rushing (Home)
     joshAllen = gameStats.find(g => g.playerId == '3069db07-aa43-4503-ab11-2ae5c0002721');
