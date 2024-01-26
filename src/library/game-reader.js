@@ -13,7 +13,7 @@ class GameReader {
   }
 
   saveGameStats(gameStats, dstGameStats) {
-    this.GameStat.bulkCreate(gameStats, { updateOnDuplicate: ["playerId", "week"] })
+    this.GameStat.bulkCreate(gameStats, { updateOnDuplicate: ["playerId", "round"] })
       .then(resp => {
         
       })
@@ -21,7 +21,7 @@ class GameReader {
         console.log(err);
       });
 
-    this.DstGameStat.bulkCreate(dstGameStats, { updateOnDuplicate: ["playerId", "week"] })
+    this.DstGameStat.bulkCreate(dstGameStats, { updateOnDuplicate: ["playerId", "round"] })
       .then(resp => {
         
       })
@@ -47,10 +47,10 @@ class GameReader {
       })
   }
 
-  findOrCreateGameStat(playerId, week, gameStats) {
+  findOrCreateGameStat(playerId, round, gameStats) {
     let gameStat = gameStats.find(g => g.playerId === playerId);
     if (!gameStat) {
-      gameStat = { playerId: playerId, week: week }
+      gameStat = { playerId: playerId, round: round }
       gameStats.push(gameStat);
     }
 

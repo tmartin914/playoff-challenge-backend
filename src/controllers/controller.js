@@ -28,152 +28,168 @@ exports.findAll = (req, res) => {
           if (player.gameTime == null || player.gameTime >= currentDateTime) {
             player.dataValues.locked = false;
           } else {
-            player.dataValues.locked = true;
+            //player.dataValues.locked = true;
+            player.dataValues.locked = false; // TODO: revert
           }
         });
         res.send(data);
       })
       .catch(err => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while retrieving tutorials."
-        });
+        res.status(500).send(err.message);
       });
-  };
+};
 
-  const isPlayerInLineup = (playerId, lineup) => {
-    playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
-    return playerIds.includes(playerId);
-  }
+/**
+ * Returns whether the player Id is in the lineup
+ * @param {*} playerId player Id
+ * @param {*} lineup lineup
+ * @returns flag indicating whether the player is in the lineup
+ */
+const isPlayerInLineup = (playerId, lineup) => {
+  const playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
+  return playerIds.includes(playerId);
+}
 
-  exports.submitLineup = (req, res) => {
-    try {
-    Team.findOne({ where: {teamId: req.body.teamId}})
-      .then(data => {
-        if (data) {
-          const lineup = {
-            teamId: req.body.teamId,
-            teamName: data.teamName,
-            round: req.body.round,
-            qbId: req.body.qb,
-            rb1Id: req.body.rb1,
-            rb2Id: req.body.rb2,
-            wr1Id: req.body.wr1,
-            wr2Id: req.body.wr2,
-            teId: req.body.te,
-            dstId: req.body.dst,
-            kId: req.body.k
-          }
-        
-          const currentDateTime = new Date();
-          const lockAllineups = new Date(2025, 0, 16, 1, 15, 0); // Add 5 hours
-          if (currentDateTime > lockAllineups) {
-            console.log(`Lineups Locked. Lock Time: ${lockAllineups}. Current Time: ${currentDateTime}`);
-            res.send({isSuccessful: false, message: `All lineups are locked for the week, could not create lineup`});
-          } else {
-            //const lockAllineups = new Date(2024, 1, 12, 20, 30, 0);
-            console.log(`Submit Lineup request for ${lineup.teamId} at ${currentDateTime}: ${lineup.qbId}, ${lineup.rb1Id}, ${lineup.rb2Id}, ${lineup.wr1Id}, ${lineup.wr2Id}, ${lineup.teId}, ${lineup.kId}, ${lineup.dstId}`);
-          
-            let existingLineup;
-            Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
-              .then(data => {
-                if (data) {
-                  existingLineup = data;
-                }
-          
-                // check that all players' games have not already started
-                let isError = false;
-                playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
-                Player.findAll({ where: { id: { [Op.in]: playerIds }}})
-                  .then(players => {
-                    try {
-                      players.forEach(player => {
-                        if (player.gameTime != null && player.gameTime <= currentDateTime) {
-                          if (!existingLineup || !isPlayerInLineup(player.id, existingLineup)) { // if player is not in the existing lineup then throw an error
-                            console.log(`Game for ${player.name} has already started`);
-                            throw new Error(`Game for ${player.name} has already started`);
-                          }
-                        }
-                      });
-                    } catch (e) { // test
-                      isError = true; 
-                      res.send({isSuccessful: false, message: e.message});
-                    }
-          
-                    if (!isError) {
-                      Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}})
-                        .then(data => {
-                          if (data) {
-                            data.update(lineup);
-                            console.log('Lineup successfully updated');
-                            res.send({isSuccessful: true, message: `Lineup successfully updated`});
-                          } else {
-                            Lineup.create(lineup);
-                            console.log('Lineup successfully created');
-                            res.send({isSuccessful: true, message: `Lineup successfully created`});
-                          }
-                        })
-                        .catch(err => {
-                          console.log('Lineup failed' + err);
-                          res.send({isSuccessful: false, message: `Internal error, could not create lineup`});
-                        });
-                      }
-                  });
-              });
-          }
-        } else {
-          console.log('Invalid Team ID');
-          res.send({isSuccessful: false, message: `Invalid Team ID, could not create lineup`});
+/**
+ * Submit Lineup
+ */
+exports.submitLineup = async (req, res) => {
+  try {
+    const team = await Team.findOne({ where: {teamId: req.body.teamId}, raw: true});
+    if (!team) {
+      throw Error('Invalid Team ID, could not create lineup');
+    }
+
+    const lineup = {
+      teamId: req.body.teamId,
+      teamName: team.teamName,
+      round: req.body.round,
+      qbId: req.body.qb,
+      rb1Id: req.body.rb1,
+      rb2Id: req.body.rb2,
+      wr1Id: req.body.wr1,
+      wr2Id: req.body.wr2,
+      teId: req.body.te,
+      dstId: req.body.dst,
+      kId: req.body.k
+    }
+  
+    const currentDateTime = new Date();
+    const lockAllineups = new Date(2025, 0, 16, 1, 15, 0); // Add 5 hours
+    //if (currentDateTime > lockAllineups) { // TODO: revert
+    if (currentDateTime == lockAllineups) {
+      console.log(`Lineups Locked. Lock Time: ${lockAllineups}. Current Time: ${currentDateTime}`);
+      return res.status(500).send(`All lineups are locked for the week, could not create lineup`);
+    }
+
+    console.log(`Submit Lineup request for ${lineup.teamId} at ${currentDateTime}: ${lineup.qbId}, ${lineup.rb1Id}, ${lineup.rb2Id}, ${lineup.wr1Id}, ${lineup.wr2Id}, ${lineup.teId}, ${lineup.kId}, ${lineup.dstId}`);
+    
+    const existingLineup = await Lineup.findOne({ where: {teamId: lineup.teamId, round: lineup.round}});
+    
+    // check that all players' games have not already started
+    const playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
+    const players = await Player.findAll({ where: { id: { [Op.in]: playerIds }}});
+
+    players?.forEach(player => {
+      if (player.gameTime != null && player.gameTime <= currentDateTime) {
+        if (!existingLineup || !isPlayerInLineup(player.id, existingLineup)) { // if player is not in the existing lineup then throw an error
+          console.log(`Game for ${player.name} has already started`);
+          //throw new Error(`Game for ${player.name} has already started`); // TODO: revert
         }
-      })
-  } catch (e) {
-    res.send({isSuccessful: false, message: `Internal error, could not create lineup`})
+      }
+    });
+
+    let msg = '';
+    if (existingLineup) {
+      existingLineup.update(lineup);
+      msg = 'Lineup successfully updated';
+    } else {
+      Lineup.create(lineup);
+      msg = 'Lineup successfully created';
+    }
+
+    console.log(msg);
+    return res.send(msg);
+  } catch (err) {
+    const msg = `Could not submit lineup. ${err.message}`;
+    console.log(msg);
+    res.status(500).send(msg);
   }
 }
 
 exports.getLineup = (req, res) => {
   Lineup.findOne({ where: {teamId: req.params.teamId, round: req.params.round}})
-    .then(data => {
-      if (data) {
-        res.send(data);
+    .then(lineup => {
+      if (lineup) {
+        // TODO: turn into a lineup with scores
+        // const playerIds = data.map(d => d.playerId);
+        // GameStat.findAll({ where: { playerId: { [Op.in]: playerIds } } })
+        //   .then(gameStats => {
+
+        //   })
+        res.send(lineup);
       } else {
         res.send(null);
       }
     })
 }
 
-const getPlayerIfLocked = (playerId, players) => {
+/**
+ * Gets the player if the player is locked
+ * @param {*} playerId player Id
+ * @param {*} players list of players
+ * @param {*} round round
+ * @param {*} isDst flag indicating whether the player is a DST
+ * @returns player if the player is locked, otherwise undefined
+ */
+const getPlayerIfLocked = async (playerId, players, round, isDst = false) => {
   const currentDateTime = new Date();
   const player = players.find(p => p.id == playerId);
-  if (player.gameTime != null && player.gameTime <= currentDateTime) {
+  // if (player.gameTime != null && player.gameTime <= currentDateTime) { // TODO: revert
+  if (true) {
+    if (!isDst) {
+      const gameStat = await this.DstGameStat.findOne({ where: { playerId: playerId, round: round }})
+        .catch(err => { console.log(err); })
+
+        player.totalPoints = gameStat.totalPoints;
+    } else {
+      const gameStat = await this.GameStat.findOne({ where: { playerId: playerId, round: round }})
+        .catch(err => { console.log(err); })
+        
+        player.totalPoints = gameStat.totalPoints;
+    }
     return player;
   } else {
     return undefined;
   }
 }
 
-exports.getTeam = (req, res) => {
+/**
+ * Get team given the team name
+ * @param {*} req request
+ * @param {*} res response
+ */
+exports.getTeam = async (req, res) => {
   const lineupToReturn = {};
-  Lineup.findOne({ where: {teamName: req.params.teamName, round: 'Wildcard'}})
-    .then(lineup => {
-      playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
-      Player.findAll({ where: { id: { [Op.in]: playerIds }}, raw: true})
-        .then(players => {
-          lineupToReturn.qb = getPlayerIfLocked(lineup.qbId, players);
-          lineupToReturn.rb1 = getPlayerIfLocked(lineup.rb1Id, players);
-          lineupToReturn.rb2 = getPlayerIfLocked(lineup.rb2Id, players);
-          lineupToReturn.wr1 = getPlayerIfLocked(lineup.wr1Id, players);
-          lineupToReturn.wr2 = getPlayerIfLocked(lineup.wr2Id, players);
-          lineupToReturn.te = getPlayerIfLocked(lineup.teId, players);
-          lineupToReturn.k = getPlayerIfLocked(lineup.kId, players);
-          lineupToReturn.dst = getPlayerIfLocked(lineup.dstId, players);
-          res.send(lineupToReturn);
-        }).catch(err => {
-          res.send();
-        });
-    }).catch(err => { 
-      res.send();
-    })
+  try {
+    const lineup = await Lineup.findOne({ where: {teamName: req.params.teamName, round: 'Wildcard'}});
+    const playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
+    const players = await Player.findAll({ where: { id: { [Op.in]: playerIds }}, raw: true});
+    
+    lineupToReturn.qb = await getPlayerIfLocked(lineup.qbId, players, round);
+    lineupToReturn.rb1 = await getPlayerIfLocked(lineup.rb1Id, players, round);
+    lineupToReturn.rb2 = await getPlayerIfLocked(lineup.rb2Id, players, round);
+    lineupToReturn.wr1 = await getPlayerIfLocked(lineup.wr1Id, players, round);
+    lineupToReturn.wr2 = await getPlayerIfLocked(lineup.wr2Id, players, round);
+    lineupToReturn.te = await getPlayerIfLocked(lineup.teId, players, round);
+    lineupToReturn.k = await getPlayerIfLocked(lineup.kId, players, round);
+    lineupToReturn.dst = await getPlayerIfLocked(lineup.dstId, players, round, true);
+    res.send(lineupToReturn);
+  } catch (err) {
+    const msg = `Could not retrieve team. ${err.message}`;
+    console.log(msg);
+    res.status(500).send(msg);
+  }
 }
 
 /**
@@ -225,22 +241,19 @@ exports.populateDB = async (req, res) => {
       res.send({ message: `${nums} Players were deleted successfully!` });
     })
     .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while removing all players."
-      });
+      res.status(500).send(err.message);
     });
 
-  week = 'Wildcard'
+  round = 'Wildcard'
   players.forEach(player => {
-    createPlayer(player, week);
+    createPlayer(player, round);
   });
 
   // Populate Game Stats
   populateGameStats();
 };
 
-createPlayer = (player, week) => {
+createPlayer = (player, round) => {
   Player.create(player)
     .then(data => {
     })
@@ -250,7 +263,7 @@ createPlayer = (player, week) => {
 
   gameStat = {
     playerId: player.Id,
-    week: week,
+    round: round,
     totalPoints: 0,
     statSummary: ''
   }
@@ -263,6 +276,9 @@ exports.getStandings = async (req, res) => {
   res.send(teams);
 }
 
+/**
+ * Create a Team
+ */
 exports.createTeam = async (req, res) => {
   Team.create({ teamId: req.params.teamId, teamName: req.params.teamName})
   .then(data => {

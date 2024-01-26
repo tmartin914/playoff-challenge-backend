@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       primaryKey: true
     },
-    week: {
+    round: {
       type: Sequelize.STRING,
       primaryKey: true
     },

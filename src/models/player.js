@@ -22,6 +22,9 @@ module.exports = (sequelize, Sequelize) => {
     },
     gameTime: {
       type: Sequelize.DATE
+    },
+    round: {
+      type: Sequelize.STRING
     }
   });
 
