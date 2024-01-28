@@ -153,7 +153,7 @@ class GameReader {
     // Update Passing Stats
     const passing = home.passing.players.concat(away.passing.players);
     passing.forEach(player => {
-      let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+      let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
       gameStat.passingYards = player.yards;
       gameStat.passingTds = player.touchdowns;
       gameStat.interceptions = player.interceptions;
@@ -162,7 +162,7 @@ class GameReader {
     // Update Rushing Stats
     const rushing = home.rushing.players.concat(away.rushing.players);
     rushing.forEach(player => {
-      let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+      let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
       gameStat.rushingYards = player.yards;
       gameStat.rushingTds = player.touchdowns;
     });
@@ -170,7 +170,7 @@ class GameReader {
     // Update Receiving Stats
     const receiving = home.receiving.players.concat(away.receiving.players);
     receiving.forEach(player => {
-      let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+      let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
       gameStat.receivingYards = player.yards;
       gameStat.receivingTds = player.touchdowns;
       gameStat.receptions = player.receptions;
@@ -179,14 +179,14 @@ class GameReader {
     // Update Fumble Stats
     const fumbles = home.fumbles.players.concat(away.fumbles.players);
     fumbles.forEach(player => {
-      let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+      let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
       gameStat.fumblesLost = player.lost_fumbles;
     });
 
     // Update 2 Point Conversion Stats
     const twoPts = home.extra_points.conversions.players.concat(away.extra_points.conversions.players);
     twoPts.forEach(player => {
-      let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+      let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
       gameStat.twoPointConversions += player.successes;
     });
 
@@ -194,7 +194,7 @@ class GameReader {
     const kickReturns = home.kick_returns.players.concat(away.kick_returns.players);
     kickReturns.forEach(player => {
       if (player.touchdowns) {
-        let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+        let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
         gameStat.miscTds += player.touchdowns;
       }
     });
@@ -202,7 +202,7 @@ class GameReader {
     const puntReturns = home.punt_returns.players.concat(away.punt_returns.players);
     puntReturns.forEach(player => {
       if (player.touchdowns) {
-        let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+        let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
         gameStat.miscTds += player.touchdowns;
       }
     });
@@ -210,7 +210,7 @@ class GameReader {
     const miscReturns = home.misc_returns.players.concat(away.misc_returns.players);
     miscReturns.forEach(player => {
       if (player.touchdowns) {
-        let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+        let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
         gameStat.miscTds += player.touchdowns;
       }
     });
@@ -218,7 +218,7 @@ class GameReader {
     // Update Kicking Stats
     const fieldGoals = home.field_goals.players.concat(away.field_goals.players);
     fieldGoals.forEach(player => {
-      let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+      let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
       gameStat.fgs039 = player.made_19 + player.made_29 + player.made_39;
       gameStat.fgs4049 = player.made_49;
       gameStat.fgs50 = player.made_50;
@@ -226,7 +226,7 @@ class GameReader {
 
     const pats = home.extra_points.kicks.players.concat(away.extra_points.kicks.players);
     pats.forEach(player => {
-      let gameStat = this.findOrCreateGameStat(player.id, 'Divisional', gameStats);
+      let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
       gameStat.pats = player.made;
     });
 
@@ -235,7 +235,7 @@ class GameReader {
     away.defense.totals.id = away.id;
     const defense = [home.defense.totals, away.defense.totals];
     defense.forEach(team => {
-      let gameStat = this.findOrCreateGameStat(team.id, 'Divisional', dstGameStats);
+      let gameStat = this.findOrCreateGameStat(team.id, 'Wildcard', dstGameStats);
       gameStat.sacks = team.sacks;
       gameStat.interceptions = team.interceptions;
       gameStat.fumblesRecovered = team.fumble_recoveries + team.sp_fumble_recoveries;
@@ -247,7 +247,7 @@ class GameReader {
     away.touchdowns.id = away.id
     const touchdowns = [home.touchdowns, away.touchdowns];
     touchdowns.forEach(team => {
-      let gameStat = this.findOrCreateGameStat(team.id, 'Divisional', dstGameStats);
+      let gameStat = this.findOrCreateGameStat(team.id, 'Wildcard', dstGameStats);
       gameStat.tds = team.total_return;
       gameStat.pointsAllowed = (gameStat.playerId == home.id) ? gameData.summary.away.points : gameData.summary.home.points;
     });

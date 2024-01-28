@@ -109,11 +109,11 @@ exports.submitLineup = async (req, res) => {
     }
 
     console.log(msg);
-    return res.send(msg);
+    return res.send({message: msg});
   } catch (err) {
     const msg = `Could not submit lineup. ${err.message}`;
     console.log(msg);
-    res.status(500).send(msg);
+    res.status(500).send({message: msg});
   }
 }
 
@@ -147,16 +147,21 @@ const getPlayerIfLocked = async (playerId, players, round, isDst = false) => {
   const player = players.find(p => p.id == playerId);
   // if (player.gameTime != null && player.gameTime <= currentDateTime) { // TODO: revert
   if (true) {
-    if (!isDst) {
-      const gameStat = await this.DstGameStat.findOne({ where: { playerId: playerId, round: round }})
+    if (isDst) {
+      const gameStat = await DstGameStat.findOne({ where: { playerId: playerId, round: round }})
         .catch(err => { console.log(err); })
 
         player.totalPoints = gameStat.totalPoints;
     } else {
-      const gameStat = await this.GameStat.findOne({ where: { playerId: playerId, round: round }})
+      try {
+        const gameStat = await GameStat.findOne({ where: { playerId: playerId, round: round }})
         .catch(err => { console.log(err); })
         
         player.totalPoints = gameStat.totalPoints;
+      } catch (err) {
+        console.log(err);
+      }
+      
     }
     return player;
   } else {
@@ -172,7 +177,8 @@ const getPlayerIfLocked = async (playerId, players, round, isDst = false) => {
 exports.getTeam = async (req, res) => {
   const lineupToReturn = {};
   try {
-    const lineup = await Lineup.findOne({ where: {teamName: req.params.teamName, round: 'Wildcard'}});
+    const round = req.params.round;
+    const lineup = await Lineup.findOne({ where: {teamName: req.params.teamName, round: round}});
     const playerIds = [lineup.qbId, lineup.rb1Id, lineup.rb2Id, lineup.wr1Id, lineup.wr2Id, lineup.teId, lineup.dstId, lineup.kId];
     const players = await Player.findAll({ where: { id: { [Op.in]: playerIds }}, raw: true});
     
