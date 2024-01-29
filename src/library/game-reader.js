@@ -31,9 +31,9 @@ class GameReader {
   }
 
   async updateGameStats(gameData) {
-    this.GameStat.findAll()
+    this.GameStat.findAll({ raw: true })
       .then(gameStats => {
-        this.DstGameStat.findAll()
+        this.DstGameStat.findAll({ raw: true })
           .then(dstGameStats => {
             this.parseGameStats(gameData, gameStats, dstGameStats);
             this.saveGameStats(gameStats, dstGameStats);
@@ -49,6 +49,9 @@ class GameReader {
 
   findOrCreateGameStat(playerId, round, gameStats) {
     let gameStat = gameStats.find(g => g.playerId === playerId);
+    if (!playerId) {
+      let x = 3;
+    }
     if (!gameStat) {
       gameStat = { playerId: playerId, round: round }
       gameStats.push(gameStat);
@@ -186,8 +189,10 @@ class GameReader {
     // Update 2 Point Conversion Stats
     const twoPts = home.extra_points.conversions.players.concat(away.extra_points.conversions.players);
     twoPts.forEach(player => {
-      let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
-      gameStat.twoPointConversions += player.successes;
+      if (!isNaN(player.successes)) {
+        let gameStat = this.findOrCreateGameStat(player.id, 'Wildcard', gameStats);
+        gameStat.twoPointConversions = (gameStat.twoPointConversions ?? 0) + player.successes;
+      }
     });
 
     // Update Misc TD Stats

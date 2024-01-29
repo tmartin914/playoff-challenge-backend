@@ -15,7 +15,7 @@ const { QueryTypes } = require('sequelize');
 const BASE_PATH = process.env.LOCAL_DEV ? './backend' : '.';
 const playerDataPath = path.resolve(`${BASE_PATH}/players.json`);
 const weekSchedulePath = path.resolve(`${BASE_PATH}/weekSchedule.json`);
-const houstonGamePath = path.resolve(`${BASE_PATH}/games/houston.json`);
+const gameDir = path.resolve(`${BASE_PATH}/games/`);
 
 const APPLICABLE_POSITIONS = ['QB', 'RB', 'FB', 'WR', 'RWR', 'LWR', 'TE'];
 
@@ -149,15 +149,15 @@ const getPlayerIfLocked = async (playerId, players, round, isDst = false) => {
   if (true) {
     if (isDst) {
       const gameStat = await DstGameStat.findOne({ where: { playerId: playerId, round: round }})
-        .catch(err => { console.log(err); })
+                                .catch(err => { console.log(err); })
 
-        player.totalPoints = gameStat.totalPoints;
+        player.totalPoints = gameStat?.totalPoints ?? 0;
     } else {
       try {
         const gameStat = await GameStat.findOne({ where: { playerId: playerId, round: round }})
-        .catch(err => { console.log(err); })
+                                 .catch(err => { console.log(err); })
         
-        player.totalPoints = gameStat.totalPoints;
+        player.totalPoints = gameStat?.totalPoints ?? 0;
       } catch (err) {
         console.log(err);
       }
@@ -202,14 +202,20 @@ exports.getTeam = async (req, res) => {
  * Populate the game stats in the DB
  */
 populateGameStats = async () => {
-  const gameData = await fs.readJSON(houstonGamePath);
   const gameReader = new GameReader(GameStat, DstGameStat);
-  gameReader.updateGameStats(gameData);
+  fs.readdir(gameDir, (err, files) => {
+    files.forEach(async filename => {
+      const gameData = await fs.readJSON(`${gameDir}/${filename}`);
+      gameReader.updateGameStats(gameData);
+    });
+  });
 }
 
 
 
 exports.populateDB = async (req, res) => {
+  populateGameStats();
+  return;
   // Populate Week Schedule
   const weekScheduleData = await fs.readJson(weekSchedulePath);
   const teamGameTimes = {};
